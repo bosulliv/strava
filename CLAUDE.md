@@ -9,8 +9,10 @@ This is a Python data analysis project that analyzes Strava activity data to und
 ## Core Architecture
 
 - **Authentication Layer**: `strava_auth.py` - Handles OAuth flow with Strava API including token refresh
-- **Data Fetching**: `strava_data_fetcher.py` - Manages API calls with rate limiting and data transformation to pandas DataFrames
-- **Analysis Engine**: `analyze_kudos.py` - Contains the `KudosAnalyzer` class that performs statistical analysis and generates visualizations
+- **Data Fetching**: `strava_data_fetcher.py` - Core API client with rate limiting and data transformation
+- **Data Collection**: `collect_strava_data.py` - Incremental data collection with persistent storage and metadata tracking
+- **Analysis Engine**: `analyze_cached_data.py` - Statistical analysis and visualization of cached data
+- **Legacy Analysis**: `analyze_kudos.py` - Original combined collection + analysis script
 - **Setup Helper**: `setup_strava_api.py` - Interactive script for initial API credential configuration
 
 ## Development Environment
@@ -28,9 +30,22 @@ source strava_env/bin/activate
 python setup_strava_api.py
 ```
 
-**Run the main analysis:**
+**Collect activity data (incremental):**
 ```bash
-python analyze_kudos.py
+python collect_strava_data.py
+```
+
+**Analyze cached data:**
+```bash
+python analyze_cached_data.py
+```
+
+**Data collection options:**
+```bash
+python collect_strava_data.py --status                    # Show collection status
+python collect_strava_data.py --activities-only           # Only fetch activities
+python collect_strava_data.py --kudos-only               # Only fetch kudos
+python collect_strava_data.py --kudos-batch-size 50      # Fetch kudos for 50 activities
 ```
 
 **Install dependencies:**
@@ -52,10 +67,19 @@ The Strava API has strict rate limits (100 requests per 15 minutes, 1000 per day
 
 ## Data Files Generated
 
-- `strava_activities.csv` - Main activity dataset
-- `strava_kudos_details.csv` - Individual kudos data (who gave kudos to which activities)
+**Cached Data (in `data/` directory):**
+- `activities.csv` - Main activity dataset with incremental updates
+- `kudos.csv` - Individual kudos data (who gave kudos to which activities)
+- `collection_metadata.json` - Tracks collection status and progress
+- `cached_kudos_analysis.png` - Analysis visualizations
+
+**Legacy Files:**
+- `strava_activities.csv` - Original format activity data
+- `strava_kudos_details.csv` - Original format kudos data
 - `strava_top_kudos_givers.csv` - Ranked list of top kudos supporters
-- `kudos_analysis.png` - Analysis visualizations
+- `kudos_analysis.png` - Original analysis visualizations
+
+**Configuration:**
 - `.env` - API credentials (not tracked in git)
 
 ## Authentication Flow

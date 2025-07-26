@@ -14,3 +14,4 @@ build/
 *.csv
 *.json
 data/
+*.png

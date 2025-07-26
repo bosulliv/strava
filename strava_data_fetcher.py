@@ -137,12 +137,16 @@ class StravaDataFetcher:
                             print(f"  -> Debug: Kudos object keys: {list(kudos.keys())}")
                             print(f"  -> Debug: Sample kudos object: {kudos}")
                         
+                        # Generate a synthetic athlete ID based on name since Strava doesn't provide IDs in kudos endpoint
+                        fullname = f"{kudos.get('firstname', '')} {kudos.get('lastname', '')}".strip()
+                        synthetic_id = hash(fullname) % (10**8)  # Generate consistent ID from name
+                        
                         kudos_data.append({
                             'activity_id': activity_id,
-                            'athlete_id': kudos.get('id') or kudos.get('athlete_id') or kudos.get('athlete', {}).get('id'),
+                            'athlete_id': synthetic_id,
                             'athlete_firstname': kudos.get('firstname', ''),
                             'athlete_lastname': kudos.get('lastname', ''),
-                            'athlete_fullname': f"{kudos.get('firstname', '')} {kudos.get('lastname', '')}".strip()
+                            'athlete_fullname': fullname
                         })
                 
                 if (i + 1) % 5 == 0:  # More frequent updates
