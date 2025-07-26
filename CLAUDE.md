@@ -91,4 +91,7 @@ The Strava API has strict rate limits (100 requests per 15 minutes, 1000 per day
 
 ## Testing
 
-No formal test framework is configured. Scripts can be tested by running them individually. Debug scripts like `debug_kudos.py` exist for troubleshooting API calls.
+No formal test framework is configured. Scripts can be tested by running them individually. Debug scripts exist for troubleshooting:
+- `debug_kudos.py` - Troubleshooting API calls
+- `debug_analysis.py` - Debugging data analysis
+- `test_kudos_api.py` - Testing kudos API functionality
