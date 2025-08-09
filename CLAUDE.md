@@ -103,6 +103,27 @@ The Strava API has strict rate limits (100 requests per 15 minutes, 1000 per day
 3. Access and refresh tokens stored in `.env` file
 4. `StravaAuth` class handles token refresh automatically
 
+## Security Requirements
+
+**MANDATORY**: Use the security-code-reviewer agent for ALL significant code changes, API integrations, and file operations. This project handles sensitive personal data and API credentials.
+
+**Security Agent Usage:**
+- **ALWAYS** run security review after writing authentication code
+- **ALWAYS** run security review after modifying API client code  
+- **ALWAYS** run security review after adding file operations
+- **ALWAYS** run security review before committing changes
+
+**Critical Findings Policy:**
+- All CRITICAL security findings MUST be fixed immediately
+- HIGH priority findings should be addressed before feature work continues
+- Document security decisions in commit messages
+
+**Automatic Security Triggers:**
+- Any code touching `strava_auth.py` → mandatory security review
+- Any new `.env` file operations → mandatory security review  
+- Any API response handling changes → mandatory security review
+- Any file path operations → mandatory security review
+
 ## Testing
 
 No formal test framework is configured. Scripts can be tested by running them individually. Test and debug scripts exist for troubleshooting:
