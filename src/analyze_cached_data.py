@@ -234,6 +234,13 @@ class CachedKudosAnalyzer:
             plt.colorbar(scatter, ax=axes[1, 1])
         
         plt.tight_layout()
+        
+        # Ensure output goes to data directory
+        data_dir = "data"
+        os.makedirs(data_dir, exist_ok=True)
+        if not output_file.startswith('data/'):
+            output_file = os.path.join(data_dir, os.path.basename(output_file))
+        
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"\nVisualization saved to {output_file}")
         

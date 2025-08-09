@@ -14,14 +14,19 @@ This project analyzes your Strava activity data to understand what factors corre
    - Create a new application (use http://localhost as the redirect URI)
    - Run the setup script and follow the prompts:
    ```bash
-   python setup_strava_api.py
+   python -m src.setup_strava_api
    ```
    - When you authorize, the browser will fail to load localhost - that's expected!
    - Copy the authorization code from the failed URL and paste it into the script
 
-3. **Run the analysis:**
+3. **Collect activity data:**
    ```bash
-   python analyze_kudos.py
+   python -m src.collect_strava_data
+   ```
+
+4. **Run the analysis:**
+   ```bash
+   python -m src.analyze_cached_data
    ```
 
 ## What the Analysis Tells You
@@ -36,12 +41,18 @@ The analysis will answer several key questions:
 
 ## Output
 
-The script generates:
+The scripts generate files in the `data/` directory:
 - Detailed statistical analysis printed to console
-- `strava_activities.csv` - Your activity data for further analysis
-- `strava_kudos_details.csv` - Individual kudos data (who gave kudos to which activities)
-- `strava_top_kudos_givers.csv` - Ranked list of your top kudos supporters
-- `kudos_analysis.png` - Visualizations of the findings
+- `data/activities.csv` - Main activity dataset with incremental updates
+- `data/kudos.csv` - Individual kudos data (who gave kudos to which activities)
+- `data/collection_metadata.json` - Tracks collection status and progress
+- `data/cached_kudos_analysis.png` - Analysis visualizations
+
+**Legacy files (for compatibility):**
+- `data/strava_activities.csv` - Original format activity data
+- `data/strava_kudos_details.csv` - Original format kudos data
+- `data/strava_top_kudos_givers.csv` - Ranked list of your top kudos supporters
+- `data/kudos_analysis.png` - Original analysis visualizations
 
 ## Key Research Question
 
@@ -49,12 +60,18 @@ The script generates:
 
 The analysis specifically looks at similar activities (same type, similar distance) to compare engagement between those with and without photos, controlling for other factors that might influence kudos.
 
-## Files
+## Directory Structure
 
-- `strava_auth.py` - Handles Strava API authentication
-- `strava_data_fetcher.py` - Fetches and processes activity data
-- `analyze_kudos.py` - Main analysis script
-- `setup_strava_api.py` - Setup helper for API credentials
+- `src/` - Main source code modules
+  - `strava_auth.py` - Handles Strava API authentication
+  - `strava_data_fetcher.py` - Core API client with rate limiting and data transformation
+  - `collect_strava_data.py` - Incremental data collection with persistent storage
+  - `analyze_cached_data.py` - Statistical analysis and visualization of cached data
+  - `analyze_kudos.py` - Original combined collection + analysis script (legacy)
+  - `setup_strava_api.py` - Interactive script for initial API credential configuration
+- `test/` - Test scripts for debugging and verification
+- `debug/` - Debugging utilities and troubleshooting scripts
+- `data/` - Generated data files and analysis outputs
 - `.env` - Your API credentials (created during setup)
 
 ## Rate Limits

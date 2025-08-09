@@ -2,7 +2,9 @@
 Setup script to help configure Strava API credentials
 """
 import os
-from strava_auth import StravaAuth
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_auth import StravaAuth
 
 def setup_strava_credentials():
     """Guide user through setting up Strava API credentials"""
@@ -15,7 +17,8 @@ def setup_strava_credentials():
     print("\nStep 1: Create .env file with your credentials")
     
     # Check if .env exists
-    if os.path.exists('.env'):
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+    if os.path.exists(env_path):
         print(".env file already exists!")
         response = input("Do you want to update it? (y/n): ")
         if response.lower() != 'y':
@@ -26,7 +29,7 @@ def setup_strava_credentials():
     client_secret = input("Enter your Strava Client Secret: ")
     
     # Write to .env file
-    with open('.env', 'w') as f:
+    with open(env_path, 'w') as f:
         f.write(f"STRAVA_CLIENT_ID={client_id}\n")
         f.write(f"STRAVA_CLIENT_SECRET={client_secret}\n")
         f.write("STRAVA_ACCESS_TOKEN=\n")
@@ -53,10 +56,10 @@ def setup_strava_credentials():
         token_data = auth.exchange_code_for_token(auth_code)
         
         # Update .env file with tokens
-        with open('.env', 'r') as f:
+        with open(env_path, 'r') as f:
             lines = f.readlines()
         
-        with open('.env', 'w') as f:
+        with open(env_path, 'w') as f:
             for line in lines:
                 if line.startswith('STRAVA_ACCESS_TOKEN='):
                     f.write(f"STRAVA_ACCESS_TOKEN={token_data['access_token']}\n")

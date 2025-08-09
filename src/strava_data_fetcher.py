@@ -4,13 +4,40 @@ Strava Data Fetcher - Retrieves activity data from Strava API
 import requests
 import pandas as pd
 import time
+import os
 from datetime import datetime
-from strava_auth import StravaAuth
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_auth import StravaAuth
 
 class StravaDataFetcher:
     def __init__(self):
         self.auth = StravaAuth()
         self.base_url = "https://www.strava.com/api/v3"
+    
+    def refresh_and_update_token(self):
+        """Refresh access token and update .env file"""
+        try:
+            token_data = self.auth.refresh_access_token()
+            
+            # Update .env file
+            env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+            with open(env_path, 'r') as f:
+                lines = f.readlines()
+            
+            with open(env_path, 'w') as f:
+                for line in lines:
+                    if line.startswith('STRAVA_ACCESS_TOKEN='):
+                        f.write(f'STRAVA_ACCESS_TOKEN={token_data["access_token"]}\n')
+                    elif line.startswith('STRAVA_REFRESH_TOKEN='):
+                        f.write(f'STRAVA_REFRESH_TOKEN={token_data["refresh_token"]}\n')
+                    else:
+                        f.write(line)
+            
+            print("Token refreshed and .env updated")
+        except Exception as e:
+            print(f"Token refresh failed: {e}")
+            raise
         
     def get_athlete_activities(self, per_page=50, page=1):
         """Fetch athlete activities"""
@@ -23,8 +50,15 @@ class StravaDataFetcher:
         }
         
         response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
         
+        # Handle token expiry
+        if response.status_code == 401:
+            print("Token expired, refreshing...")
+            self.refresh_and_update_token()
+            headers = self.auth.get_headers()
+            response = requests.get(url, headers=headers, params=params)
+        
+        response.raise_for_status()
         return response.json()
     
     def get_activity_details(self, activity_id):
@@ -43,6 +77,14 @@ class StravaDataFetcher:
         headers = self.auth.get_headers()
         
         response = requests.get(url, headers=headers)
+        
+        # Handle token expiry
+        if response.status_code == 401:
+            print("Token expired, refreshing...")
+            self.refresh_and_update_token()
+            headers = self.auth.get_headers()
+            response = requests.get(url, headers=headers)
+        
         print(f"Kudos API call for activity {activity_id}: Status {response.status_code}")
         
         if response.status_code == 200:

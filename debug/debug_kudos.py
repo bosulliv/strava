@@ -1,7 +1,10 @@
 """
 Debug kudos fetching in isolation
 """
-from strava_data_fetcher import StravaDataFetcher
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_data_fetcher import StravaDataFetcher
 
 def debug_kudos():
     print("=== DEBUGGING KUDOS FETCH ===")

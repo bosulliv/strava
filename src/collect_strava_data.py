@@ -5,7 +5,9 @@ import pandas as pd
 import json
 import os
 from datetime import datetime, timezone
-from strava_data_fetcher import StravaDataFetcher
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_data_fetcher import StravaDataFetcher
 
 class StravaDataCollector:
     def __init__(self, data_dir="data"):
@@ -45,7 +47,11 @@ class StravaDataCollector:
     def load_existing_activities(self):
         """Load existing activities CSV if it exists"""
         if os.path.exists(self.activities_file):
-            return pd.read_csv(self.activities_file)
+            df = pd.read_csv(self.activities_file)
+            # Ensure start_date_parsed is datetime type
+            if 'start_date_parsed' in df.columns:
+                df['start_date_parsed'] = pd.to_datetime(df['start_date_parsed'])
+            return df
         else:
             return pd.DataFrame()
     

@@ -1,7 +1,10 @@
 """
 Test script to debug kudos API issues
 """
-from strava_data_fetcher import StravaDataFetcher
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_data_fetcher import StravaDataFetcher
 import pandas as pd
 
 def test_kudos_api():

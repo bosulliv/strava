@@ -5,8 +5,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 from scipy import stats
-from strava_data_fetcher import StravaDataFetcher
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.strava_data_fetcher import StravaDataFetcher
 
 class KudosAnalyzer:
     def __init__(self):
@@ -298,7 +302,10 @@ class KudosAnalyzer:
             ax4.set_title('Photos vs Kudos Scatter Plot')
         
         plt.tight_layout()
-        plt.savefig('kudos_analysis.png', dpi=300, bbox_inches='tight')
+        data_dir = "data"
+        os.makedirs(data_dir, exist_ok=True)
+        output_path = os.path.join(data_dir, 'kudos_analysis.png')
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
         plt.close()  # Close the figure to free memory
     
     def run_full_analysis(self, max_activities=None, fetch_kudos_givers=True):
@@ -324,21 +331,27 @@ class KudosAnalyzer:
         # Generate visualizations
         try:
             self.generate_visualizations()
-            print("\nVisualization saved as 'kudos_analysis.png'")
+            print(f"\nVisualization saved as '{os.path.join('data', 'kudos_analysis.png')}'")
         except Exception as e:
             print(f"Could not generate visualizations: {e}")
         
         # Save data
-        self.df.to_csv('strava_activities.csv', index=False)
-        print("Data saved to 'strava_activities.csv'")
+        data_dir = "data"
+        os.makedirs(data_dir, exist_ok=True)
+        
+        activities_path = os.path.join(data_dir, 'strava_activities.csv')
+        self.df.to_csv(activities_path, index=False)
+        print(f"Data saved to '{activities_path}'")
         
         if self.kudos_df is not None and not self.kudos_df.empty:
-            self.kudos_df.to_csv('strava_kudos_details.csv', index=False)
-            print("Kudos data saved to 'strava_kudos_details.csv'")
+            kudos_path = os.path.join(data_dir, 'strava_kudos_details.csv')
+            self.kudos_df.to_csv(kudos_path, index=False)
+            print(f"Kudos data saved to '{kudos_path}'")
             
             if kudos_counts is not None and not kudos_counts.empty:
-                kudos_counts.to_csv('strava_top_kudos_givers.csv', index=False)
-                print("Top kudos givers saved to 'strava_top_kudos_givers.csv'")
+                top_kudos_path = os.path.join(data_dir, 'strava_top_kudos_givers.csv')
+                kudos_counts.to_csv(top_kudos_path, index=False)
+                print(f"Top kudos givers saved to '{top_kudos_path}'")
 
 if __name__ == "__main__":
     analyzer = KudosAnalyzer()
