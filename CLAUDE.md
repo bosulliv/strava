@@ -22,7 +22,7 @@ This is a Python data analysis project that analyzes Strava activity data to und
 - `debug/` - Debugging utilities and troubleshooting scripts
 - `data/` - Generated data files and analysis outputs
 
-**Note:** Scripts can be run directly from project root using `python src/script_name.py`
+**Note:** Scripts can be run as modules (`python -m src.script_name`) or directly (`python src/script_name.py`)
 
 ## Development Environment
 
@@ -36,30 +36,31 @@ source strava_env/bin/activate
 
 **Initial Setup (first time only):**
 ```bash
-python src/setup_strava_api.py
+python -m src.setup_strava_api
 ```
 
 **Collect activity data (incremental):**
 ```bash
-python src/collect_strava_data.py
+python -m src.collect_strava_data
 ```
 
 **Analyze cached data:**
 ```bash
-python src/analyze_cached_data.py
+python -m src.analyze_cached_data
 ```
 
 **Run legacy analysis (combined collection + analysis):**
 ```bash
-python src/analyze_kudos.py
+python -m src.analyze_kudos
 ```
 
 **Data collection options:**
 ```bash
-python src/collect_strava_data.py --status                    # Show collection status
-python src/collect_strava_data.py --activities-only           # Only fetch activities
-python src/collect_strava_data.py --kudos-only               # Only fetch kudos
-python src/collect_strava_data.py --kudos-batch-size 50      # Fetch kudos for 50 activities
+python -m src.collect_strava_data --status                    # Show collection status
+python -m src.collect_strava_data --activities-only           # Only fetch activities
+python -m src.collect_strava_data --kudos-only               # Only fetch kudos
+python -m src.collect_strava_data --kudos-batch-size 50      # Fetch kudos for 50 activities
+python -m src.collect_strava_data --max-activities 100       # Limit total activities fetched
 ```
 
 **Install dependencies:**
@@ -73,7 +74,6 @@ pip install -r requirements.txt
 - matplotlib, seaborn - Visualization
 - requests - API calls
 - python-dotenv - Environment variable management
-- scipy - Statistical analysis
 
 ## API Rate Limiting
 
@@ -98,10 +98,11 @@ The Strava API has strict rate limits (100 requests per 15 minutes, 1000 per day
 
 ## Authentication Flow
 
-1. User creates Strava app at https://www.strava.com/settings/api
-2. `setup_strava_api.py` guides through OAuth authorization
-3. Access and refresh tokens stored in `.env` file
-4. `StravaAuth` class handles token refresh automatically
+1. User creates Strava app at https://www.strava.com/settings/api (use http://localhost as redirect URI)
+2. `setup_strava_api.py` guides through OAuth authorization process
+3. Browser will fail to load localhost during auth - copy authorization code from failed URL
+4. Access and refresh tokens stored in `.env` file
+5. `StravaAuth` class handles automatic token refresh when tokens expire
 
 ## Security Requirements
 
@@ -124,16 +125,37 @@ The Strava API has strict rate limits (100 requests per 15 minutes, 1000 per day
 - Any API response handling changes → mandatory security review
 - Any file path operations → mandatory security review
 
+**Data Sensitivity Notes:**
+- `.env` contains API credentials and is git-ignored
+- Data files contain personal activity information and are git-ignored
+- All API calls include proper token refresh and rate limiting
+
 ## Testing
 
 No formal test framework is configured. Scripts can be tested by running them individually. Test and debug scripts exist for troubleshooting:
 
 **Test Scripts:**
 - `test/test_kudos_api.py` - Testing kudos API functionality
-- `test/test_auto_refresh.py` - Testing automatic token refresh
+- `test/test_auto_refresh.py` - Testing automatic token refresh  
 - `test/test_timestamp_fix.py` - Testing timestamp parsing fixes
+- `test/test_csv_paths.py` - Testing CSV file handling
+- `test/test_image_paths.py` - Testing image file operations
 
 **Debug Scripts:**
 - `debug/debug_kudos.py` - Troubleshooting API calls
 - `debug/debug_analysis.py` - Debugging data analysis
 - `debug/debug_timestamp.py` - Debugging timestamp issues
+
+## Data Architecture
+
+**Incremental Collection System:**
+- `StravaDataCollector` manages incremental data fetching to avoid re-downloading existing data
+- `collection_metadata.json` tracks collection state and progress
+- Activities and kudos are collected separately to optimize API usage
+- Rate limiting includes 15-minute waits when API limits are hit
+
+**Data Pipeline:**
+1. **Authentication**: `StravaAuth` handles OAuth flow and token management
+2. **Fetching**: `StravaDataFetcher` retrieves activities and kudos with rate limiting
+3. **Collection**: `StravaDataCollector` manages incremental updates and persistence
+4. **Analysis**: Analysis scripts process cached data for insights and visualizations
